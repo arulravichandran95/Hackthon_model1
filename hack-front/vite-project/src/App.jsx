@@ -5,9 +5,29 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Logging in with', email, password);
+    setMessage('');
+    
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert(data.message + ' Token: ' + data.token);
+      } else {
+        setMessage(data.error || 'Login failed');
+      }
+    } catch (err) {
+      setMessage('Network error: Unable to connect to server');
+    }
   };
 
   return (
@@ -24,6 +44,12 @@ function App() {
           <p>Sign in to continue to your account</p>
         </div>
         
+        {message && (
+          <div style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="email">Email Address</label>
